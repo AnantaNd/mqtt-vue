@@ -10,7 +10,7 @@ workflow:
 stages:
   - deploy
 
-build_image:
+build docker image:
   stage: deploy
   services:
     - rizulhanif/docker:rc-dind
