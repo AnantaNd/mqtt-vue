@@ -21,7 +21,7 @@ build docker image:
       --restart unless-stopped \
       --publish 3000:80 \
       --detach \
-      $IMAGE_NAME:latest"
+      $CI_REGISTRY_IMAGE"
   before_script:
     - echo $CI_JOB_TOKEN | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - cp $ENV_FILE .env
