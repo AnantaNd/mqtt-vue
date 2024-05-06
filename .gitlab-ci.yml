@@ -1,0 +1,33 @@
+variables:
+  IMAGE_NAME: '${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}'
+  IMAGE_TAG: '${CI_PROJECT_NAME}.${CI_COMMIT_SHORT_SHA}'
+
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_PROTECTED && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "deployment" && $CI_PIPELINE_SOURCE != "merge_request_event"
+
+stages:
+  - deploy
+
+build docker image:
+  stage: deploy
+  services:
+    - rizulhanif/docker:rc-dind
+  variables:
+    DOCKER_TLS_CERTDIR: '/certs'
+    COMMANDS: "docker run --name $CI_PROJECT_NAME \
+      --env APP_VERSION=$IMAGE_TAG \
+      --restart unless-stopped \
+      --publish 3000:80 \
+      --detach \
+      $CI_REGISTRY_IMAGE"
+  before_script:
+    - echo $CI_JOB_TOKEN | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - cp $ENV_FILE .env
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE --all-tags
+  after_script:
+    - docker ps -aqf name=$CI_PROJECT_NAME | xargs docker rm -f 2>/dev/null || true
+    - $COMMANDS
