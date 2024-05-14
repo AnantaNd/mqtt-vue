@@ -72,9 +72,11 @@
           <section id="form" class="py-8">
             <a-form :model="form" type="submit" @finish="getData" class="flex flex-col gap-y-3">
               <a-form-item name="identify" :rules="rules.identify">
+                <h1 class="font-semibold uppercase">username</h1>
                 <a-input v-model:value="form.identify" placeholder="username" size="large" />
               </a-form-item>
               <a-form-item name="password" :rules="rules.password">
+                <h1 class="font-semibold uppercase">password</h1>
                 <a-input-password
                   v-model:value="form.password"
                   type="password"
